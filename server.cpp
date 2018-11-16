@@ -20,5 +20,11 @@ void Server::registerUser() {
 }
 
 void Server::broadcast(QByteArray message) {
-    emit broadcasting(message);
+    emit broadcasting(sanitized(message));
+}
+
+QByteArray sanitized(QByteArray data) {
+    data.replace('\r', "");
+    data.replace('\n', "");
+    return data;
 }

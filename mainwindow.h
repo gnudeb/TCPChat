@@ -18,6 +18,7 @@ public:
 
 private slots:
     void handleBroadcast(QByteArray message);
+    void performBroadcast();
 
 private:
     Ui::MainWindow *ui;

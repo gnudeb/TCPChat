@@ -6,6 +6,8 @@
 #include <QTcpSocket>
 #include "user.h"
 
+QByteArray sanitized(QByteArray data);
+
 class Server : public QTcpServer {
     Q_OBJECT
 
@@ -16,8 +18,9 @@ public:
 signals:
     void broadcasting(QByteArray message);
 
-private slots:
+public slots:
     void broadcast(QByteArray message);
+private slots:
     void registerUser();
 };
 

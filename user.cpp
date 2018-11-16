@@ -11,6 +11,6 @@ void User::relayIncomingData() {
 }
 
 void User::receiveMessage(QByteArray data) {
-    socket->write(data);
+    socket->write(data.append('\n'));
     socket->flush();
 }

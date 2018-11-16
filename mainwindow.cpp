@@ -13,6 +13,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    connect(
+        ui->userInputLineEdit, &QLineEdit::editingFinished,
+        this, &MainWindow::performBroadcast);
+    connect(
+        ui->submitButton, &QPushButton::clicked,
+        this, &MainWindow::performBroadcast);
 }
 
 MainWindow::~MainWindow() {
@@ -21,4 +27,17 @@ MainWindow::~MainWindow() {
 
 void MainWindow::handleBroadcast(QByteArray message) {
     ui->chatText->append(QString(message));
+}
+
+void MainWindow::performBroadcast() {
+    QString message = ui->userInputLineEdit->text();
+
+    if (message.isEmpty()) {
+        return;
+    }
+
+    QByteArray data = message.toUtf8();
+    server->broadcast(data);
+
+    ui->userInputLineEdit->clear();
 }
