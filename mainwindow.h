@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <server.h>
+#include <QByteArray>
+#include "server.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,9 +17,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_submitButton_clicked();
-
-    void on_toggleServerButton_clicked();
+    void handleBroadcast(QByteArray message);
 
 private:
     Ui::MainWindow *ui;

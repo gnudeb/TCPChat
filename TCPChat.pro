@@ -28,12 +28,12 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     server.cpp \
-    thread.cpp
+    user.cpp
 
 HEADERS += \
         mainwindow.h \
     server.h \
-    thread.h
+    user.h
 
 FORMS += \
         mainwindow.ui

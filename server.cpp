@@ -1,53 +1,24 @@
 #include "server.h"
-#include <QTcpSocket>
-#include <QHostAddress>
-#include <thread.h>
 
 Server::Server(QObject *parent) : QTcpServer(parent) {
-
+    connect(this, &Server::newConnection, this, &Server::registerUser);
 }
 
-void Server::start() {
-    if (!listen(QHostAddress::LocalHost, 18998)) {
-        qDebug() << "Could not start the server.";
-    } else {
-        qDebug() << "Server is running.";
+void Server::start(quint16 port) {
+    if (!listen(QHostAddress::LocalHost, port)) {
+        qDebug() << "Could not start a server on port" << port;
+        return;
     }
+    qDebug() << "Server is running on port" << port;
 }
 
-void Server::newMessage(qintptr socketDescriptor, QByteArray data) {
-    qDebug()
-        << "New message from "
-        << socketDescriptor
-        << ": "
-        << data;
-
-    // If client has no nickname, then treat their message as one
-    if (clients.value(socketDescriptor).isEmpty()) {
-        QString nickname = QString(data);
-        clients.insert(socketDescriptor, nickname);
-        qDebug() << "New member: " << nickname;
-    } else {
-        qDebug()
-            << clients.value(socketDescriptor)
-            << ": "
-            << data;
-        // TODO: Broadcast the message to all clients
-    }
+void Server::registerUser() {
+    QTcpSocket *socket = nextPendingConnection();
+    User *user = new User(socket, this);
+    connect(user, &User::sentData, this, &Server::broadcast);
+    connect(this, &Server::broadcasting, user, &User::receiveMessage);
 }
 
-void Server::incomingConnection(qintptr socketDescriptor) {
-    qDebug() << "New connection from " << socketDescriptor << ".";
-
-    clients.insert(socketDescriptor, QString());
-
-    Thread *thread = new Thread(static_cast<int>(socketDescriptor), this);
-    connect(thread, &Thread::receivedData, this, &Server::newMessage, Qt::DirectConnection);
-    connect(thread, &Thread::disconnected, this, &Server::clientDisconnected, Qt::DirectConnection);
-    thread->start();
+void Server::broadcast(QByteArray message) {
+    emit broadcasting(message);
 }
-
-void Server::clientDisconnected(qintptr socketDescriptor) {
-    clients.remove(socketDescriptor);
-}
-
