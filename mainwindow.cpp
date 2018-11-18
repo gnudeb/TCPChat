@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QHostAddress>
 #include <QByteArray>
+#include <QTime>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,7 +31,7 @@ MainWindow::~MainWindow() {
 void MainWindow::handleBroadcast(QByteArray message, User *user) {
     QString out;
     if (user != nullptr) {
-        out = QString("%1: %2")
+        out = QString("<b>%1:</b> %2")
             .arg(QString(user->getUsername()))
             .arg(QString(message));
     } else {
@@ -69,6 +70,7 @@ void MainWindow::toggleServer() {
 }
 
 void MainWindow::dumpInfo(QString info) {
-    ui->chatText->append(info);
+    QString time = QTime::currentTime().toString("hh:mm:ss");
+    ui->chatText->append(QString("<b>%1</b> %2").arg(time).arg(info));
     qDebug() << info;
 }
