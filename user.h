@@ -20,9 +20,12 @@ public:
 
 signals:
     void sentData(QByteArray data, User *user);
+    void disconnected(User *user);
 
-public slots:
+private slots:
     void relayIncomingData();
+    void handleDisconnect();
+public slots:
     void receiveMessage(QByteArray data, User *user);
 };
 

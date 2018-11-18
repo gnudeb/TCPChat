@@ -2,6 +2,7 @@
 
 User::User(QTcpSocket *socket, QObject *parent) : QObject(parent), socket(socket) {
     connect(socket, &QTcpSocket::readyRead, this, &User::relayIncomingData);
+    connect(socket, &QTcpSocket::disconnected, this, &User::handleDisconnect);
 }
 
 bool User::hasUsername() {
@@ -20,6 +21,10 @@ void User::relayIncomingData() {
     while (!socket->atEnd()) {
         emit sentData(socket->readLine(), this);
     }
+}
+
+void User::handleDisconnect() {
+    emit disconnected(this);
 }
 
 void User::receiveMessage(QByteArray data, User *user) {

@@ -13,7 +13,7 @@ class Server : public QTcpServer {
 
 public:
     Server(QObject *parent=nullptr);
-    void start(quint16 port);
+    bool start(quint16 port);
 
 signals:
     void broadcasting(QByteArray message, User *user);
@@ -22,6 +22,7 @@ public slots:
     void handleNewMessage(QByteArray message, User *user);
 private slots:
     void registerUser();
+    void handleDisconnect(User *user);
 };
 
 #endif // SERVER_H

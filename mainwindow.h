@@ -19,6 +19,7 @@ public:
 private slots:
     void handleBroadcast(QByteArray message, User *user);
     void performBroadcast();
+    void toggleServer();
 
 private:
     Ui::MainWindow *ui;
