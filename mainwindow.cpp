@@ -8,8 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow) {
 
     server = new Server(this);
-//    connect(server, &Server::broadcasting, this, &MainWindow::handleBroadcast);
-//    server->start(18998);
 
     ui->setupUi(this);
 
@@ -38,7 +36,7 @@ void MainWindow::handleBroadcast(QByteArray message, User *user) {
     } else {
         out = QString(message);
     }
-    ui->chatText->append(out);
+    dumpInfo(out);
 }
 
 void MainWindow::performBroadcast() {
@@ -58,14 +56,19 @@ void MainWindow::toggleServer() {
     if (!server->isListening()) {
         quint16 port = ui->portLineEdit->text().toUShort();
         if (!server->start(port)) {
-            ui->chatText->append(QString("Failed to start a server on port %1").arg(port));
+            dumpInfo(QString("Failed to start a server on port %1").arg(port));
             return;
         }
 
         connect(server, &Server::broadcasting, this, &MainWindow::handleBroadcast);
 
-        ui->chatText->append(QString("Server is running on port %1").arg(port));
+        dumpInfo(QString("Server is running on port %1").arg(port));
         ui->serverPanelFrame->setEnabled(true);
         ui->chatText->setEnabled(true);
     }
+}
+
+void MainWindow::dumpInfo(QString info) {
+    ui->chatText->append(info);
+    qDebug() << info;
 }

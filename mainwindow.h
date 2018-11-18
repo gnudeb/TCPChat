@@ -20,6 +20,7 @@ private slots:
     void handleBroadcast(QByteArray message, User *user);
     void performBroadcast();
     void toggleServer();
+    void dumpInfo(QString info);
 
 private:
     Ui::MainWindow *ui;
