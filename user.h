@@ -10,16 +10,20 @@ class User : public QObject {
 
 private:
     QTcpSocket *socket = nullptr;
+    QByteArray *username = nullptr;
 
 public:
     explicit User(QTcpSocket *socket, QObject *parent = nullptr);
+    bool hasUsername();
+    QByteArray getUsername();
+    void setUsername(QByteArray username);
 
 signals:
-    void sentData(QByteArray data);
+    void sentData(QByteArray data, User *user);
 
 public slots:
     void relayIncomingData();
-    void receiveMessage(QByteArray data);
+    void receiveMessage(QByteArray data, User *user);
 };
 
 #endif // USER_H

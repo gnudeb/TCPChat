@@ -25,8 +25,16 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::handleBroadcast(QByteArray message) {
-    ui->chatText->append(QString(message));
+void MainWindow::handleBroadcast(QByteArray message, User *user) {
+    QString out;
+    if (user != nullptr) {
+        out = QString("%1: %2")
+            .arg(QString(user->getUsername()))
+            .arg(QString(message));
+    } else {
+        out = QString(message);
+    }
+    ui->chatText->append(out);
 }
 
 void MainWindow::performBroadcast() {
@@ -37,7 +45,7 @@ void MainWindow::performBroadcast() {
     }
 
     QByteArray data = message.toUtf8();
-    server->broadcast(data);
+    server->handleNewMessage(data, nullptr);
 
     ui->userInputLineEdit->clear();
 }

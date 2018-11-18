@@ -16,10 +16,10 @@ public:
     void start(quint16 port);
 
 signals:
-    void broadcasting(QByteArray message);
+    void broadcasting(QByteArray message, User *user);
 
 public slots:
-    void broadcast(QByteArray message);
+    void handleNewMessage(QByteArray message, User *user);
 private slots:
     void registerUser();
 };

@@ -17,7 +17,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void handleBroadcast(QByteArray message);
+    void handleBroadcast(QByteArray message, User *user);
     void performBroadcast();
 
 private:
