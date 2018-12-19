@@ -1,53 +1,53 @@
 #include "server.h"
-#include <QTcpSocket>
-#include <QHostAddress>
-#include <thread.h>
 
 Server::Server(QObject *parent) : QTcpServer(parent) {
-
+    connect(this, &Server::newConnection, this, &Server::registerUser);
 }
 
-void Server::start() {
-    if (!listen(QHostAddress::LocalHost, 18998)) {
-        qDebug() << "Could not start the server.";
+bool Server::start(quint16 port) {
+    if (!listen(QHostAddress::LocalHost, port)) {
+        qDebug() << "Could not start a server on port" << port;
+        return false;
+    }
+    qDebug() << "Server is running on port" << port;
+    return true;
+}
+
+void Server::registerUser() {
+    QTcpSocket *socket = nextPendingConnection();
+    User *user = new User(socket, this);
+    connect(user, &User::sentData, this, &Server::handleNewMessage);
+    connect(this, &Server::broadcasting, user, &User::receiveMessage);
+    connect(user, &User::disconnected, this, &Server::handleDisconnect);
+}
+
+void Server::handleDisconnect(User *user) {
+    disconnect(user, &User::sentData, this, &Server::handleNewMessage);
+    disconnect(this, &Server::broadcasting, user, &User::receiveMessage);
+    if (user->hasUsername()) {
+        QString username = QString(user->getUsername());
+        emit broadcasting(QString("User %1 disconnected.").arg(username).toUtf8(), nullptr);
+    }
+    user->deleteLater();
+}
+
+void Server::handleNewMessage(QByteArray message, User *user) {
+    if (user == nullptr) {
+        qDebug() << "Message from server" << ":" << message;
+        emit broadcasting(sanitized(message), nullptr);
+    } else if (!user->hasUsername()) {
+        user->setUsername(sanitized(message));
+
+        QString out = QString("User %1 has joined!").arg(QString(user->getUsername()));
+        emit broadcasting(out.toUtf8(), nullptr);
     } else {
-        qDebug() << "Server is running.";
+        qDebug() << "New message from" << user->getUsername() << ":" << message;
+        emit broadcasting(sanitized(message), user);
     }
 }
 
-void Server::newMessage(qintptr socketDescriptor, QByteArray data) {
-    qDebug()
-        << "New message from "
-        << socketDescriptor
-        << ": "
-        << data;
-
-    // If client has no nickname, then treat their message as one
-    if (clients.value(socketDescriptor).isEmpty()) {
-        QString nickname = QString(data);
-        clients.insert(socketDescriptor, nickname);
-        qDebug() << "New member: " << nickname;
-    } else {
-        qDebug()
-            << clients.value(socketDescriptor)
-            << ": "
-            << data;
-        // TODO: Broadcast the message to all clients
-    }
+QByteArray sanitized(QByteArray data) {
+    data.replace('\r', "");
+    data.replace('\n', "");
+    return data;
 }
-
-void Server::incomingConnection(qintptr socketDescriptor) {
-    qDebug() << "New connection from " << socketDescriptor << ".";
-
-    clients.insert(socketDescriptor, QString());
-
-    Thread *thread = new Thread(static_cast<int>(socketDescriptor), this);
-    connect(thread, &Thread::receivedData, this, &Server::newMessage, Qt::DirectConnection);
-    connect(thread, &Thread::disconnected, this, &Server::clientDisconnected, Qt::DirectConnection);
-    thread->start();
-}
-
-void Server::clientDisconnected(qintptr socketDescriptor) {
-    clients.remove(socketDescriptor);
-}
-

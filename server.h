@@ -1,26 +1,28 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <QDebug>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QByteArray>
-#include <QMap>
+#include "user.h"
+
+QByteArray sanitized(QByteArray data);
 
 class Server : public QTcpServer {
     Q_OBJECT
+
 public:
-    Server(QObject *parent = Q_NULLPTR);
-    void start();
+    Server(QObject *parent=nullptr);
+    bool start(quint16 port);
 
-private:
-    QMap<qintptr, QString> clients;
+signals:
+    void broadcasting(QByteArray message, User *user);
 
+public slots:
+    void handleNewMessage(QByteArray message, User *user);
 private slots:
-    void newMessage(qintptr socketDescriptor, QByteArray data);
-    void clientDisconnected(qintptr socketDescriptor);
-
-protected:
-    void incomingConnection(qintptr socketDescriptor);
+    void registerUser();
+    void handleDisconnect(User *user);
 };
 
 #endif // SERVER_H
